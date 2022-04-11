@@ -404,8 +404,8 @@ pub async fn veth_exists(netns: &str, name: &str) -> Result<bool> {
 }
 
 /// Create a wireguard interface.
-pub async fn wireguard_create(netns: &str, name: &str) -> Result<()> {
-    info!("wireguard create {}, {}", netns, name);
+pub async fn wireguard_create(netns: Option<&str>, name: &str) -> Result<()> {
+    info!("wireguard create {:?}, {}", netns, name);
     if !Command::new(IP_PATH)
         .arg("link")
         .arg("add")
@@ -419,17 +419,19 @@ pub async fn wireguard_create(netns: &str, name: &str) -> Result<()> {
     {
         return Err(anyhow!("Error creating wireguard interface"));
     }
-    if !Command::new(IP_PATH)
-        .arg("link")
-        .arg("set")
-        .arg(name)
-        .arg("netns")
-        .arg(netns)
-        .status()
-        .await?
-        .success()
-    {
-        return Err(anyhow!("Error moving wireguard interface"));
+    if let Some(netns) = netns {
+        if !Command::new(IP_PATH)
+            .arg("link")
+            .arg("set")
+            .arg(name)
+            .arg("netns")
+            .arg(netns)
+            .status()
+            .await?
+            .success()
+        {
+            return Err(anyhow!("Error moving wireguard interface"));
+        }
     }
     Ok(())
 }
