@@ -420,7 +420,7 @@ pub async fn wireguard_create(netns: Option<&str>, name: &str) -> Result<()> {
         .await?
         .success()
     {
-        return Err(anyhow!("Error creating wireguard interface"));
+        return Err(anyhow!("Error creating wireguard interface {name} for {netns:?}"));
     }
     if let Some(netns) = netns {
         if !Command::new(IP_PATH)
@@ -433,7 +433,7 @@ pub async fn wireguard_create(netns: Option<&str>, name: &str) -> Result<()> {
             .await?
             .success()
         {
-            return Err(anyhow!("Error moving wireguard interface"));
+            return Err(anyhow!("Error moving wireguard interface {name} to {netns:?}"));
         }
     }
     Ok(())
