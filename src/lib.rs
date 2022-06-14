@@ -13,9 +13,9 @@ use std::str::FromStr;
 use tokio::io::AsyncWriteExt;
 use tokio::process::Command;
 
-pub const IPTABLES_SAVE_PATH: &'static str = "/usr/sbin/iptables-save";
-pub const IPTABLES_RESTORE_PATH: &'static str = "/usr/sbin/iptables-restore";
-pub const IP_PATH: &'static str = "/usr/sbin/ip";
+pub const IPTABLES_SAVE_PATH: &'static str = "iptables-save";
+pub const IPTABLES_RESTORE_PATH: &'static str = "iptables-restore";
+pub const IP_PATH: &'static str = "ip";
 
 /// Adds a network namespace. This creates a new, isolated network namespace
 /// with nothing but the loopback interface in it.
