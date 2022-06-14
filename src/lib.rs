@@ -12,8 +12,6 @@ use std::path::{Path, PathBuf};
 use std::str::FromStr;
 use tokio::io::AsyncWriteExt;
 use tokio::process::Command;
-use types::*;
-use wireguard_keys::{Privkey, Pubkey};
 
 pub const IPTABLES_SAVE_PATH: &'static str = "/usr/sbin/iptables-save";
 pub const IPTABLES_RESTORE_PATH: &'static str = "/usr/sbin/iptables-restore";
@@ -22,7 +20,7 @@ pub const IP_PATH: &'static str = "/usr/sbin/ip";
 /// Adds a network namespace. This creates a new, isolated network namespace
 /// with nothing but the loopback interface in it.
 pub async fn netns_add(name: &str) -> Result<()> {
-    info!("netns add {}", name);
+    info!("netns add {name}");
     let success = Command::new(IP_PATH)
         .arg("netns")
         .arg("add")
@@ -44,6 +42,8 @@ pub async fn netns_exists(name: &str) -> Result<bool> {
         .arg("exec")
         .arg(name)
         .arg("/bin/true")
+        .stderr(std::process::Stdio::piped())
+        .stdout(std::process::Stdio::piped())
         .status()
         .await?
         .success();
@@ -52,7 +52,7 @@ pub async fn netns_exists(name: &str) -> Result<bool> {
 
 /// Delete a network namespace. This will also delete any network interfaces contained therein.
 pub async fn netns_del(name: &str) -> Result<()> {
-    info!("netns del {}", name);
+    info!("netns del {name}");
     let success = Command::new(IP_PATH)
         .arg("netns")
         .arg("del")
@@ -420,7 +420,9 @@ pub async fn wireguard_create(netns: Option<&str>, name: &str) -> Result<()> {
         .await?
         .success()
     {
-        return Err(anyhow!("Error creating wireguard interface {name} for {netns:?}"));
+        return Err(anyhow!(
+            "Error creating wireguard interface {name} for {netns:?}"
+        ));
     }
     if let Some(netns) = netns {
         if !Command::new(IP_PATH)
@@ -433,7 +435,9 @@ pub async fn wireguard_create(netns: Option<&str>, name: &str) -> Result<()> {
             .await?
             .success()
         {
-            return Err(anyhow!("Error moving wireguard interface {name} to {netns:?}"));
+            return Err(anyhow!(
+                "Error moving wireguard interface {name} to {netns:?}"
+            ));
         }
     }
     Ok(())

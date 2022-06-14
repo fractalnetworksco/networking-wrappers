@@ -6,19 +6,19 @@ use std::str::FromStr;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use wireguard_keys::{Privkey, Pubkey, Secret};
 
-#[derive(Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct NetnsItem {
     pub name: String,
     pub id: Option<usize>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct NetworkStats {
-    private_key: Privkey,
+    pub private_key: Privkey,
     pub public_key: Pubkey,
     pub listen_port: u16,
-    fwmark: Option<u16>,
-    peers: Vec<PeerStats>,
+    pub fwmark: Option<u16>,
+    pub peers: Vec<PeerStats>,
 }
 
 impl FromStr for NetworkStats {
@@ -57,7 +57,7 @@ impl NetworkStats {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct PeerStats {
     pub public_key: Pubkey,
     pub preshared_key: Option<Secret>,
