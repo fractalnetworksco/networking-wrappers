@@ -175,6 +175,12 @@ pub struct InterfaceShow {
     pub operstate: String,
 }
 
+impl InterfaceShow {
+    pub fn is_down(&self) -> bool {
+        self.operstate == "DOWN"
+    }
+}
+
 /// Get details of an interface.
 pub async fn interface_show(netns: Option<&str>, interface: &str) -> Result<InterfaceShow> {
     let mut command = Command::new(IP_PATH);
@@ -185,25 +191,23 @@ pub async fn interface_show(netns: Option<&str>, interface: &str) -> Result<Inte
     command.arg("link").arg("show").arg("dev").arg(interface);
     let output = command.output().await?;
     if !output.status.success() {
-        return Err(anyhow!("Error checking interface state"));
+        return Err(anyhow!(
+            "Error checking interface state {interface} in {netns:?}"
+        ));
     }
     let output = String::from_utf8(output.stdout)?;
     let items: Vec<InterfaceShow> = serde_json::from_str(&output)?;
     if items.len() == 1 {
         Ok(items[0].clone())
     } else {
-        Err(anyhow!("Did not return any interfaces"))
+        Err(anyhow!(
+            "Did not return any interfaces for {interface} in {netns:?}"
+        ))
     }
 }
 
-/// Check if an interface is down.
-pub async fn interface_down(netns: Option<&str>, interface: &str) -> Result<bool> {
-    let show = interface_show(netns, interface).await?;
-    Ok(show.operstate == "DOWN")
-}
-
 /// Set an interface to be up.
-pub async fn interface_set_up(netns: Option<&str>, interface: &str) -> Result<()> {
+pub async fn interface_up(netns: Option<&str>, interface: &str) -> Result<()> {
     info!("interface_up({:?}, {})", netns, interface);
     let mut command = Command::new(IP_PATH);
     if let Some(netns) = netns {
@@ -211,7 +215,9 @@ pub async fn interface_set_up(netns: Option<&str>, interface: &str) -> Result<()
     }
     command.arg("link").arg("set").arg(interface).arg("up");
     if !command.status().await?.success() {
-        return Err(anyhow!("Error setting interface up"));
+        return Err(anyhow!(
+            "Error setting interface {interface} in {netns:?} up"
+        ));
     }
     Ok(())
 }
@@ -230,7 +236,9 @@ pub async fn interface_mtu(netns: Option<&str>, interface: &str, mtu: usize) -> 
         .arg("mtu")
         .arg(mtu.to_string());
     if !command.status().await?.success() {
-        return Err(anyhow!("Error setting interface up"));
+        return Err(anyhow!(
+            "Error setting interface MTU for {interface} in {netns:?}"
+        ));
     }
     Ok(())
 }
@@ -317,9 +325,7 @@ pub async fn link_get_master(netns: Option<&str>, interface: &str) -> Result<Opt
         .await?;
     if !output.status.success() {
         return Err(anyhow!(
-            "Error checking interface {} master in {:?}",
-            interface,
-            netns
+            "Error checking interface {interface} master in {netns:?}",
         ));
     }
     let output = String::from_utf8(output.stdout)?;
@@ -350,10 +356,7 @@ pub async fn link_set_master(netns: Option<&str>, interface: &str, master: &str)
         .await?;
     if !status.success() {
         return Err(anyhow!(
-            "Error setting interface {} master in {:?} to {}",
-            interface,
-            netns,
-            master
+            "Error setting interface {interface} master in {netns:?} to {master}",
         ));
     }
     Ok(())
@@ -378,10 +381,7 @@ pub async fn veth_add(netns: &str, outer: &str, inner: &str) -> Result<()> {
         .success()
     {
         return Err(anyhow!(
-            "Error creating veth interfaces {} and {} in {}",
-            outer,
-            inner,
-            netns
+            "Error creating veth interfaces {outer} and {inner} in {netns}",
         ));
     }
     Ok(())
