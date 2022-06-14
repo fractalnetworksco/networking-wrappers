@@ -48,6 +48,7 @@ test:
     - source ci-setup-cargo
     - apt update
     - apt install -y iproute2 iptables wireguard-tools
+    - /usr/sbin/ip -V
     - cargo test --all-features -- --test-threads 1 --include-ignored
   interruptible: true
 
