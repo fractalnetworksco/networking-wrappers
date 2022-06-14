@@ -46,7 +46,7 @@ test:
   stage: test
   script:
     - source ci-setup-cargo
-    - cargo test --all-features --test-threads 1 --include-ignored
+    - cargo test --all-features -- --test-threads 1 --include-ignored
   interruptible: true
 
 # generate release build
