@@ -47,3 +47,79 @@ async fn test_netns_list() -> Result<(), Box<dyn Error>> {
 
     Ok(())
 }
+
+#[ignore]
+#[tokio::test]
+async fn test_wireguard_mtu() -> Result<(), Box<dyn Error>> {
+    let wireguard_interface = "wg83932849";
+
+    // create some interface
+    wireguard_create(None, wireguard_interface).await?;
+    let show = interface_show(None, wireguard_interface).await?;
+    assert_eq!(show.ifname, wireguard_interface);
+
+    // set MTU and verify
+    interface_mtu(None, wireguard_interface, 1300).await?;
+    let show = interface_show(None, wireguard_interface).await?;
+    assert_eq!(show.mtu, Some(1300));
+
+    // clean up
+    interface_del(None, wireguard_interface).await?;
+
+    // same, but in network namespace
+    let netns = "asadsasd";
+    netns_add(netns).await?;
+    wireguard_create(Some(netns), wireguard_interface).await?;
+    let show = interface_show(Some(netns), wireguard_interface).await?;
+    assert_eq!(show.ifname, wireguard_interface);
+
+    // set MTU and verify
+    interface_mtu(Some(netns), wireguard_interface, 1300).await?;
+    let show = interface_show(Some(netns), wireguard_interface).await?;
+    assert_eq!(show.mtu, Some(1300));
+
+    // clean up
+    interface_del(Some(netns), wireguard_interface).await?;
+    netns_del(netns).await?;
+
+    Ok(())
+}
+
+#[ignore]
+#[tokio::test]
+async fn test_wireguard_up() -> Result<(), Box<dyn Error>> {
+    let wireguard_interface = "wg42839432";
+
+    // create some interface
+    wireguard_create(None, wireguard_interface).await?;
+    let show = interface_show(None, wireguard_interface).await?;
+    assert_eq!(show.ifname, wireguard_interface);
+    assert!(show.is_down());
+
+    // set MTU and verify
+    interface_up(None, wireguard_interface).await?;
+    let show = interface_show(None, wireguard_interface).await?;
+    assert!(!show.is_down());
+
+    // clean up
+    interface_del(None, wireguard_interface).await?;
+
+    // same, but in network namespace
+    let netns = "akjhaskd";
+    netns_add(netns).await?;
+    wireguard_create(Some(netns), wireguard_interface).await?;
+    let show = interface_show(Some(netns), wireguard_interface).await?;
+    assert_eq!(show.ifname, wireguard_interface);
+    assert!(show.is_down());
+
+    // set MTU and verify
+    interface_up(Some(netns), wireguard_interface).await?;
+    let show = interface_show(Some(netns), wireguard_interface).await?;
+    assert!(!show.is_down());
+
+    // clean up
+    interface_del(Some(netns), wireguard_interface).await?;
+    netns_del(netns).await?;
+
+    Ok(())
+}

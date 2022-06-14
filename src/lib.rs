@@ -25,6 +25,8 @@ pub async fn netns_add(name: &str) -> Result<()> {
         .arg("netns")
         .arg("add")
         .arg(name)
+        .stderr(std::process::Stdio::piped())
+        .stdout(std::process::Stdio::piped())
         .status()
         .await?
         .success();
@@ -57,6 +59,8 @@ pub async fn netns_del(name: &str) -> Result<()> {
         .arg("netns")
         .arg("del")
         .arg(name)
+        .stderr(std::process::Stdio::piped())
+        .stdout(std::process::Stdio::piped())
         .status()
         .await?
         .success();
@@ -218,6 +222,20 @@ pub async fn interface_up(netns: Option<&str>, interface: &str) -> Result<()> {
         return Err(anyhow!(
             "Error setting interface {interface} in {netns:?} up"
         ));
+    }
+    Ok(())
+}
+
+/// Remove interface.
+pub async fn interface_del(netns: Option<&str>, interface: &str) -> Result<()> {
+    info!("interface_del({:?}, {})", netns, interface);
+    let mut command = Command::new(IP_PATH);
+    if let Some(netns) = netns {
+        command.arg("-n").arg(netns);
+    }
+    command.arg("link").arg("del").arg("dev").arg(interface);
+    if !command.status().await?.success() {
+        return Err(anyhow!("Error removing interface {interface} in {netns:?}"));
     }
     Ok(())
 }
