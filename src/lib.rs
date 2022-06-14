@@ -1,5 +1,7 @@
 mod types;
 pub use types::*;
+#[cfg(test)]
+mod tests;
 
 use anyhow::{anyhow, Context, Result};
 use ipnet::{IpNet, Ipv4Net, Ipv6Net};
