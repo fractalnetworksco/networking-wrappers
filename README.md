@@ -9,7 +9,7 @@ Use this crate if you want to interact with low-level networking utilities in an
 
 Resources:
 - Documentation: [nightly][rustdoc], [latest release][docs]
-- Crates.io: [fractal-btrfs-wrappers][cratesio]
+- Crates.io: [fractal-networking-wrappers][cratesio]
 
 ## Usage
 
