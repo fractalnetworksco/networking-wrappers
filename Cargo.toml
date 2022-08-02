@@ -1,9 +1,11 @@
 [package]
-name = "networking-wrappers"
+name = "fractal-networking-wrappers"
 version = "0.1.0"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+authors = ["Patrick Elsen <patrick@ether.ai>"]
+description = "Async wrappers around Linux networking utilities."
+license = "AGPL-3.0-only"
+repository = "https://github.com/fractalnetworksco/networking-wrappers"
 
 [dependencies]
 anyhow = "1.0.56"

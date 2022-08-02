@@ -92,7 +92,7 @@ pub async fn netns_list() -> Result<Vec<NetnsItem>> {
         .output()
         .await?;
     if !output.status.success() {
-        return Err(anyhow!("Error fetching wireguard stats"));
+        return Err(anyhow!("Error fetching wireguard stats: {output:?}"));
     }
     let output = String::from_utf8(output.stdout).context("Parsing command output as string")?;
     let mut items: Vec<NetnsItem> = vec![];
